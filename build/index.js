@@ -523,8 +523,6 @@ function switchLang() {
   }
 }
 
-// KEYDOWN and KEYUP
-
 window.addEventListener('keydown', (e) => {
   e.preventDefault();
   const keyCode = document.querySelector(`.${e.code}`);
