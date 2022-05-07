@@ -147,14 +147,15 @@ let lang = 'eng';
 let language = engKey;
 let caps = false;
 let capsSwitch = false;
-const shift = false; // добавить это, либо он не нужен юзать капс?
+let shiftCaps = false;
+let shiftSwitch = false;
 let intervalSwitchLang;
 let switchedLanguage = false;
 
-// window.addEventListener('beforeunload', () => {
-//     localStorage.setItem('lang', lang);
-//     localStorage.setItem('caps', caps);
-// });
+window.addEventListener('beforeunload', () => {
+  localStorage.setItem('lang', lang);
+  localStorage.setItem('caps', caps);
+});
 
 console.log('Клавиатура запоминает состояние языка и состояние caps lock');
 
@@ -162,13 +163,23 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('lang')) {
     lang = localStorage.getItem('lang');
   }
-  if (localStorage.getItem('caps')) {
-    caps = localStorage.getItem('caps');
+  if (localStorage.getItem('caps') === 'true') {
+    caps = true;
   }
 });
 
 function writeText(content) {
-  document.querySelector('.text').textContent += content.toLowerCase();
+  const text = document.querySelector('.text');
+  const start = text.selectionStart;
+  const end = text.selectionEnd;
+  if (caps) {
+    content.toUpperCase();
+  } else {
+    content.toLowerCase();
+  }
+  text.textContent = text.value.substring(0, start) + content + text.value.substring(end);
+  text.focus();
+  text.setSelectionRange(start + 1, start + 1);
 }
 
 function toUpToLow() {
@@ -177,6 +188,7 @@ function toUpToLow() {
       index++;
       if (index < 51) {
         el.textContent = el.textContent.toLowerCase();
+        document.querySelector('.green').setAttribute('style', 'display:none;');
       }
     });
   } else {
@@ -184,9 +196,27 @@ function toUpToLow() {
       index++;
       if (index < 51) {
         el.textContent = el.textContent.toUpperCase();
+        document.querySelector('.green').removeAttribute('style');
       }
     });
   }
+}
+
+function keyDelete() {
+  const text = document.querySelector('.text');
+  const start = text.selectionStart;
+  text.textContent = text.value.substring(0, start) + text.value.substring(start + 1);
+  text.focus();
+  text.setSelectionRange(start, start);
+}
+
+function keyBackspace() {
+  const text = document.querySelector('.text');
+  const start = text.selectionStart;
+  const end = text.selectionEnd;
+  text.textContent = text.value.substring(0, start - 1) + text.value.substring(end);
+  text.focus();
+  text.setSelectionRange(start - 1, start - 1);
 }
 
 function setKeyboardOnLoad() {
@@ -239,7 +269,7 @@ function setKeyboardOnLoad() {
           divRow.append(divKey);
           const divKeyTab = document.createElement('span');
           divKeyTab.classList.add('value');
-          divKeyTab.textContent = '   ';
+          divKeyTab.textContent = '\t';
           divKey.append(divKeyTab);
         }
         const divKey = document.createElement('div');
@@ -374,8 +404,72 @@ function setKeyboardOnLoad() {
   toUpToLow();
   document.querySelector('.keyboard-wrapper').addEventListener('click', (e) => {
     if (!e.target.classList.contains('row-key')) {
-      e = e.target.closest('.key');
-      writeText(e.querySelector('.value').textContent);
+      const event = e.target.closest('.key');
+      if (!e.target.closest('.press')) {
+        switch (event.classList.value.split(' ')[event.classList.value.split(' ').length - 1]) {
+          case 'CapsLock':
+            if (!caps) {
+              caps = true;
+              document.querySelector('.green').removeAttribute('style');
+            } else {
+              caps = false;
+              document.querySelector('.green').setAttribute('style', 'display:none;');
+            }
+            toUpToLow();
+            break;
+          case 'ShiftLeft':
+            if (!shiftSwitch) {
+              if (caps) {
+                shiftSwitch = true;
+                shiftCaps = true;
+                caps = false;
+              } else {
+                shiftSwitch = true;
+                caps = true;
+              }
+            }
+            toUpToLow();
+            break;
+          case 'ShiftRight':
+            if (!shiftSwitch) {
+              if (caps) {
+                shiftCaps = true;
+                caps = false;
+                shiftSwitch = true;
+              } else {
+                shiftSwitch = true;
+                caps = true;
+              }
+            }
+            toUpToLow();
+            break;
+          case 'ControlLeft':
+            break;
+          case 'MetaLeft':
+            break;
+          case 'AltLeft':
+            break;
+          case 'AltRight':
+            break;
+          case 'ControlRight':
+            break;
+          case 'Delete':
+            keyDelete();
+            break;
+          case 'Backspace':
+            keyBackspace();
+            break;
+          default: if (caps) {
+            if (event.querySelector('.extra') !== null) {
+              writeText(event.querySelector('.extra').textContent);
+            } else {
+              writeText(event.querySelector('.value').textContent);
+            }
+          } else {
+            writeText(event.querySelector('.value').textContent);
+          }
+        }
+      }
     }
   });
 }
@@ -433,25 +527,81 @@ function switchLang() {
 
 window.addEventListener('keydown', (e) => {
   e.preventDefault();
-  if (document.querySelector(`.${e.code}`) !== null) {
-    document.querySelector(`.${e.code}`).closest('.key').classList.add('press');
-  }
-  if (e.code === 'CapsLock' && !capsSwitch) {
-    if (!caps) {
-      caps = true;
-      capsSwitch = true;
-      document.querySelector('.green').removeAttribute('style');
-    } else {
-      caps = false;
-      capsSwitch = true;
-      document.querySelector('.green').setAttribute('style', 'display:none;');
+  const keyCode = document.querySelector(`.${e.code}`);
+  if (keyCode !== null) {
+    keyCode.closest('.key').classList.add('press');
+    switch (keyCode.classList.value.split(' ')[keyCode.classList.value.split(' ').length - 2]) {
+      case 'CapsLock':
+        if (!capsSwitch) {
+          if (!caps) {
+            caps = true;
+            capsSwitch = true;
+            document.querySelector('.green').removeAttribute('style');
+          } else {
+            caps = false;
+            capsSwitch = true;
+            document.querySelector('.green').setAttribute('style', 'display:none;');
+          }
+        }
+        toUpToLow();
+        break;
+      case 'ShiftLeft':
+        if (!shiftSwitch) {
+          if (caps) {
+            shiftSwitch = true;
+            shiftCaps = true;
+            caps = false;
+          } else {
+            shiftSwitch = true;
+            caps = true;
+          }
+        }
+        toUpToLow();
+        break;
+      case 'ShiftRight':
+        if (!shiftSwitch) {
+          if (caps) {
+            shiftCaps = true;
+            caps = false;
+            shiftSwitch = true;
+          } else {
+            shiftSwitch = true;
+            caps = true;
+          }
+        }
+        toUpToLow();
+        break;
+      case 'ControlLeft':
+        break;
+      case 'MetaLeft':
+        break;
+      case 'AltLeft':
+        break;
+      case 'AltRight':
+        break;
+      case 'ControlRight':
+        break;
+      case 'Delete':
+        keyDelete();
+        break;
+      case 'Backspace':
+        keyBackspace();
+        break;
+      default: if (caps) {
+        if (keyCode.querySelector('.extra') !== null) {
+          writeText(keyCode.querySelector('.extra').textContent);
+        } else {
+          writeText(keyCode.querySelector('.value').textContent);
+        }
+      } else {
+        writeText(keyCode.querySelector('.value').textContent);
+      }
     }
   }
   if (e.code in codeSet) {
     codeSet[e.code] = true;
     intervalSwitchLang = setInterval(switchLang, 10);
   }
-  toUpToLow();
 });
 
 window.addEventListener('keyup', (e) => {
@@ -463,6 +613,15 @@ window.addEventListener('keyup', (e) => {
   }
   if (e.code === 'CapsLock') {
     capsSwitch = false;
+  }
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+    shiftSwitch = false;
+    if (shiftCaps) {
+      shiftCaps = false;
+      caps = true;
+    } else {
+      caps = false;
+    }
   }
   switchedLanguage = false;
   toUpToLow();
