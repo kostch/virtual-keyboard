@@ -157,8 +157,6 @@ window.addEventListener('beforeunload', () => {
   localStorage.setItem('caps', caps);
 });
 
-console.log('Клавиатура запоминает состояние языка и состояние caps lock');
-
 window.addEventListener('load', () => {
   if (localStorage.getItem('lang')) {
     lang = localStorage.getItem('lang');
@@ -182,24 +180,30 @@ function writeText(content) {
   text.setSelectionRange(start + 1, start + 1);
 }
 
+function textUp(e) {
+  e.textContent = e.textContent.toLowerCase();
+  document.querySelector('.green').setAttribute('style', 'display:none;');
+}
+
+function textLow(e) {
+  e.textContent = e.textContent.toUpperCase();
+  document.querySelector('.green').removeAttribute('style');
+}
+
 function toUpToLow() {
   let index = 0;
   if (!caps) {
     document.querySelectorAll('.value').forEach((el) => {
       index += 1;
       if (index < 51) {
-        // eslint-disable-next-line no-param-reassign
-        el.textContent = el.textContent.toLowerCase();
-        document.querySelector('.green').setAttribute('style', 'display:none;');
+        textUp(el);
       }
     });
   } else {
     document.querySelectorAll('.value').forEach((el) => {
       index += 1;
       if (index < 51) {
-        // eslint-disable-next-line no-param-reassign
-        el.textContent = el.textContent.toUpperCase();
-        document.querySelector('.green').removeAttribute('style');
+        textLow(el);
       }
     });
   }
