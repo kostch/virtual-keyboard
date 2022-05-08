@@ -183,18 +183,21 @@ function writeText(content) {
 }
 
 function toUpToLow() {
+  let index = 0;
   if (!caps) {
-    document.querySelectorAll('.value').forEach((el, index) => {
-      index++;
+    document.querySelectorAll('.value').forEach((el) => {
+      index += 1;
       if (index < 51) {
+        // eslint-disable-next-line no-param-reassign
         el.textContent = el.textContent.toLowerCase();
         document.querySelector('.green').setAttribute('style', 'display:none;');
       }
     });
   } else {
-    document.querySelectorAll('.value').forEach((el, index) => {
-      index++;
+    document.querySelectorAll('.value').forEach((el) => {
+      index += 1;
       if (index < 51) {
+        // eslint-disable-next-line no-param-reassign
         el.textContent = el.textContent.toUpperCase();
         document.querySelector('.green').removeAttribute('style');
       }
@@ -205,7 +208,12 @@ function toUpToLow() {
 function keyDelete() {
   const text = document.querySelector('.text');
   const start = text.selectionStart;
-  text.textContent = text.value.substring(0, start) + text.value.substring(start + 1);
+  const end = text.selectionEnd;
+  if (start === end) {
+    text.textContent = text.value.substring(0, start) + text.value.substring(start + 1);
+  } else {
+    text.textContent = text.value.substring(0, start) + text.value.substring(end);
+  }
   text.focus();
   text.setSelectionRange(start, start);
 }
@@ -214,9 +222,14 @@ function keyBackspace() {
   const text = document.querySelector('.text');
   const start = text.selectionStart;
   const end = text.selectionEnd;
-  text.textContent = text.value.substring(0, start - 1) + text.value.substring(end);
+  if (start === end) {
+    text.textContent = text.value.substring(0, start - 1) + text.value.substring(end);
+    text.setSelectionRange(start - 1, start - 1);
+  } else {
+    text.textContent = text.value.substring(0, start) + text.value.substring(end);
+    text.setSelectionRange(start, start);
+  }
   text.focus();
-  text.setSelectionRange(start - 1, start - 1);
 }
 
 function setKeyboardOnLoad() {
@@ -228,13 +241,13 @@ function setKeyboardOnLoad() {
   const divRowsWrapper = document.createElement('div');
   divRowsWrapper.classList.add('keyboard-wrapper');
   document.querySelector('.container').append(divRowsWrapper);
-  for (const keys in language) {
+  Object.keys(language).forEach((keys) => {
     if (keys === '0') {
       const divRow = document.createElement('div');
       divRow.classList.add('row-key', 'row-first');
       divRowsWrapper.append(divRow);
 
-      for (const key in engKey[keys]) {
+      Object.keys(language[keys]).forEach((key) => {
         const divKey = document.createElement('div');
         divKey.classList.add('key', 'key-short', `${language[keys][key].class}`);
         if (language[keys][key].extra.length > 0) {
@@ -249,19 +262,19 @@ function setKeyboardOnLoad() {
         divKey.append(divKeyValue);
         divRow.append(divKey);
         if (+key === Object.keys(language[keys]).length - 1) {
-          const divKey = document.createElement('div');
-          divKey.classList.add('key', 'key-long', 'Backspace');
-          divKey.textContent = 'backspace';
-          divRow.append(divKey);
+          const divKeyB = document.createElement('div');
+          divKeyB.classList.add('key', 'key-long', 'Backspace');
+          divKeyB.textContent = 'backspace';
+          divRow.append(divKeyB);
         }
-      }
+      });
     }
     if (keys === '1') {
       const divRow = document.createElement('div');
       divRow.classList.add('row-key', 'row-second');
       divRowsWrapper.append(divRow);
 
-      for (const key in language[keys]) {
+      Object.keys(language[keys]).forEach((key) => {
         if (+key === 0) {
           const divKey = document.createElement('div');
           divKey.classList.add('key', 'key-middle', 'Tab');
@@ -286,19 +299,19 @@ function setKeyboardOnLoad() {
         divKey.append(divKeyValue);
         divRow.append(divKey);
         if (+key === Object.keys(language[keys]).length - 1) {
-          const divKey = document.createElement('div');
-          divKey.classList.add('key', 'key-middle', 'Delete');
-          divKey.textContent = 'del';
-          divRow.append(divKey);
+          const divKeyD = document.createElement('div');
+          divKeyD.classList.add('key', 'key-middle', 'Delete');
+          divKeyD.textContent = 'del';
+          divRow.append(divKeyD);
         }
-      }
+      });
     }
     if (keys === '2') {
       const divRow = document.createElement('div');
       divRow.classList.add('row-key', 'row-third');
       divRowsWrapper.append(divRow);
 
-      for (const key in language[keys]) {
+      Object.keys(language[keys]).forEach((key) => {
         if (+key === 0) {
           const divKey = document.createElement('div');
           divKey.classList.add('key', 'key-long', 'CapsLock');
@@ -326,25 +339,25 @@ function setKeyboardOnLoad() {
         divKeyValue.textContent = language[keys][key].value;
         divKey.append(divKeyValue);
         if (+key === Object.keys(language[keys]).length - 1) {
-          const divKey = document.createElement('div');
-          divKey.classList.add('key', 'key-long', 'Enter');
-          divKey.setAttribute('style', 'width: 94px;');
-          divKey.textContent = 'Enter';
-          divRow.append(divKey);
-          const divKeyValue = document.createElement('span');
-          divKeyValue.classList.add('value');
-          divKeyValue.setAttribute('style', 'display:none');
-          divKeyValue.textContent = '\n';
-          divKey.append(divKeyValue);
+          const divKeyE = document.createElement('div');
+          divKeyE.classList.add('key', 'key-long', 'Enter');
+          divKeyE.setAttribute('style', 'width: 94px;');
+          divKeyE.textContent = 'Enter';
+          divRow.append(divKeyE);
+          const divKeyValue1 = document.createElement('span');
+          divKeyValue1.classList.add('value');
+          divKeyValue1.setAttribute('style', 'display:none');
+          divKeyValue1.textContent = '\n';
+          divKeyE.append(divKeyValue1);
         }
-      }
+      });
     }
     if (keys === '3') {
       const divRow = document.createElement('div');
       divRow.classList.add('row-key', 'row-four');
       divRowsWrapper.append(divRow);
 
-      for (const key in language[keys]) {
+      Object.keys(language[keys]).forEach((key) => {
         if (+key === 0) {
           const divKey = document.createElement('div');
           divKey.classList.add('key', 'key-long', 'ShiftLeft');
@@ -365,19 +378,19 @@ function setKeyboardOnLoad() {
         divKeyValue.textContent = language[keys][key].value;
         divKey.append(divKeyValue);
         if (+key === Object.keys(language[keys]).length - 1) {
-          const divKey = document.createElement('div');
+          // const divKey = document.createElement('div');
           divKey.classList.add('key', 'key-short');
           divKey.textContent = 'Shift';
           divRow.append(divKey);
         }
-      }
+      });
     }
     if (keys === '4') {
       const divRow = document.createElement('div');
       divRow.classList.add('row-key', 'row-five');
       divRowsWrapper.append(divRow);
 
-      for (const key in language[keys]) {
+      Object.keys(language[keys]).forEach((key) => {
         const divKey = document.createElement('div');
         divKey.classList.add('key', 'key-short', `${language[keys][key].class}`);
         divRow.append(divKey);
@@ -398,9 +411,9 @@ function setKeyboardOnLoad() {
           divKey.setAttribute('style', 'width: 84px;');
         }
         divKey.append(divKeyValue);
-      }
+      });
     }
-  }
+  });
   toUpToLow();
   document.querySelector('.keyboard-wrapper').addEventListener('click', (e) => {
     if (!e.target.classList.contains('row-key')) {
