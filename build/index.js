@@ -157,8 +157,6 @@ window.addEventListener('beforeunload', () => {
   localStorage.setItem('caps', caps);
 });
 
-console.log('Клавиатура запоминает состояние языка и состояние caps lock');
-
 window.addEventListener('load', () => {
   if (localStorage.getItem('lang')) {
     lang = localStorage.getItem('lang');
