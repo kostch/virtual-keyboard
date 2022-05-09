@@ -407,7 +407,6 @@ function setKeyboardOnLoad() {
         divKeyValue.textContent = language[keys][key].value;
         divKey.append(divKeyValue);
         if (+key === Object.keys(language[keys]).length - 1) {
-          // const divKey = document.createElement('div');
           divKey.classList.add('key', 'key-short');
           divKey.textContent = 'Shift';
           divRow.append(divKey);
