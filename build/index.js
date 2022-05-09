@@ -496,9 +496,13 @@ function setKeyboardOnLoad() {
           case 'Backspace':
             keyBackspace();
             break;
-          default: if (caps) {
-            if (event.querySelector('.extra') !== null) {
-              writeText(event.querySelector('.extra').textContent);
+          default: if (event.querySelector('.extra') !== null) {
+            if (caps) {
+              if (!shift) {
+                writeText(event.querySelector('.extra').textContent);
+              } else {
+                writeText(event.querySelector('.value').textContent);
+              }
             } else {
               writeText(event.querySelector('.value').textContent);
             }
