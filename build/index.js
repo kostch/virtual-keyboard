@@ -147,6 +147,7 @@ let lang = 'eng';
 let language = engKey;
 let caps = false;
 let capsSwitch = false;
+let shift = false;
 let shiftCaps = false;
 let shiftSwitch = false;
 let intervalSwitchLang;
@@ -234,6 +235,30 @@ function keyBackspace() {
     text.setSelectionRange(start, start);
   }
   text.focus();
+}
+
+function defaultKey(e) {
+  if (e.querySelector('.extra') !== null) {
+    if (e.querySelector('.extra').closest('.row-first')) {
+      if (caps) {
+        if (shift) {
+          writeText(e.querySelector('.extra').textContent);
+        } else {
+          writeText(e.querySelector('.value').textContent);
+        }
+      } else if (shift) {
+        writeText(e.querySelector('.extra').textContent);
+      } else {
+        writeText(e.querySelector('.value').textContent);
+      }
+    } else if (shift) {
+      writeText(e.querySelector('.extra').textContent);
+    } else {
+      writeText(e.querySelector('.value').textContent);
+    }
+  } else {
+    writeText(e.querySelector('.value').textContent);
+  }
 }
 
 function setKeyboardOnLoad() {
@@ -435,28 +460,24 @@ function setKeyboardOnLoad() {
             toUpToLow();
             break;
           case 'ShiftLeft':
-            if (!shiftSwitch) {
-              if (caps) {
-                shiftSwitch = true;
-                shiftCaps = true;
-                caps = false;
-              } else {
-                shiftSwitch = true;
-                caps = true;
-              }
+            if (caps) {
+              shiftSwitch = true;
+              shiftCaps = true;
+              caps = false;
+            } else {
+              shiftSwitch = true;
+              caps = true;
             }
             toUpToLow();
             break;
           case 'ShiftRight':
-            if (!shiftSwitch) {
-              if (caps) {
-                shiftCaps = true;
-                caps = false;
-                shiftSwitch = true;
-              } else {
-                shiftSwitch = true;
-                caps = true;
-              }
+            if (caps) {
+              shiftCaps = true;
+              caps = false;
+              shiftSwitch = true;
+            } else {
+              shiftSwitch = true;
+              caps = true;
             }
             toUpToLow();
             break;
@@ -566,9 +587,11 @@ window.addEventListener('keydown', (e) => {
             shiftSwitch = true;
             shiftCaps = true;
             caps = false;
+            shift = true;
           } else {
             shiftSwitch = true;
             caps = true;
+            shift = true;
           }
         }
         toUpToLow();
@@ -578,10 +601,12 @@ window.addEventListener('keydown', (e) => {
           if (caps) {
             shiftCaps = true;
             caps = false;
+            shift = true;
             shiftSwitch = true;
           } else {
             shiftSwitch = true;
             caps = true;
+            shift = true;
           }
         }
         toUpToLow();
@@ -602,15 +627,7 @@ window.addEventListener('keydown', (e) => {
       case 'Backspace':
         keyBackspace();
         break;
-      default: if (caps) {
-        if (keyCode.querySelector('.extra') !== null) {
-          writeText(keyCode.querySelector('.extra').textContent);
-        } else {
-          writeText(keyCode.querySelector('.value').textContent);
-        }
-      } else {
-        writeText(keyCode.querySelector('.value').textContent);
-      }
+      default: defaultKey(keyCode);
     }
   }
   if (e.code in codeSet) {
@@ -634,8 +651,10 @@ window.addEventListener('keyup', (e) => {
     if (shiftCaps) {
       shiftCaps = false;
       caps = true;
+      shift = false;
     } else {
       caps = false;
+      shift = false;
     }
   }
   switchedLanguage = false;
